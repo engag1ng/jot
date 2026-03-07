@@ -66,6 +66,16 @@ char *multiply_character(char character, int multiplicator) {
     return string;
 }
 
+int print_line(int start, char *line) {
+    for(int j = start; j < strlen(line); j++) {
+        if (line[j] == ';') {
+            return j;
+        } else {
+            addch(line[j]);
+        }                
+    }
+}
+
 int main(int argc, char* argv[]) {
     char *filename = argv[1];
     int row, col;
@@ -101,49 +111,50 @@ int main(int argc, char* argv[]) {
     void draw_basic() {
         getmaxyx(stdscr, row, col);
         mvprintw(0, 0, "Jot - %s\n", filename);
-        char *topLine = malloc(longest_row+6);
+        char *topLine = malloc(longest_row+5);
         if (!topLine) return;
 
+        // Divider line
         topLine[0] = '|';
 
-        for (int i = 1; i < longest_row + 6; i++) {
+        for (int i = 1; i < longest_row + 5; i++) {
             topLine[i] = '-';
         }
 
-        topLine[longest_row + 4] = '|';
-        topLine[longest_row + 5] = '\0';
+        topLine[longest_row + 3] = '|';
+        topLine[longest_row + 4] = '\0';
 
         mvprintw(3, 1, "%s", topLine);
+        free(topLine);
+        topLine = NULL;
+        // ---- //
 
-        move(2, 1);
-        printw("| Name");
-        printw(multiply_character(' ', longest_name-3));
-        printw("| Date added");
-        printw(multiply_character(' ', longest_row - longest_name-11));
-        addch('|');
+        // Variables
+        int first_divider = longest_name+3;
+        int start_printing_date = longest_name+5;
+        int second_divider = longest_name+16;
+        // ---- //
 
+        // Column names
+        mvprintw(2, 1, "| Name");
+        mvprintw(2, first_divider, "| Date added |");
+        // ---- //
+
+        // Content
         for (int i = 0; i < count; i++) {
             move(4+i, 0);
-            addch(i+'0');
-            printw("| ");
-            for(int j = 0; j < strlen(lines[i]); j++) {
-                char *ch = &lines[i][j];
-                if (*ch == ';') {
-                    if (j < longest_name) {
-                        printw(multiply_character(' ', longest_name-j));
-                    }
-                    printw(" | ");
-                } else {
-                    addch(lines[i][j]);
-                }                
-            }
+            printw("%d| ", i);
+            int last_printed = 0;
+            last_printed = print_line(last_printed, lines[i]);
+            mvprintw(4+i, first_divider, "| ");
+            last_printed = print_line(last_printed+1, lines[i]);
+            mvprintw(4+i, second_divider, "| ");
         }
+        // ---- //
 
         mvprintw(row-1, 0, "$ ");
 
         refresh();
-        free(topLine);
-        topLine = NULL;
     }
 
     while (1) {
