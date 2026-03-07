@@ -49,25 +49,8 @@ int writeFile(const char *filename, const char *data) {
     return 0;
 }
 
-char *multiply_character(char character, int multiplicator) {
-    if (multiplicator <= 0) {
-        return NULL;
-    }
-
-    char *string = malloc(multiplicator+1);
-    if (string == NULL) {
-        return NULL;
-    }
-
-    for (int j=0; j< multiplicator; j++) {
-        string[j] = character;
-    }
-    string[multiplicator] = '\0';
-    return string;
-}
-
 int print_line(int start, char *line) {
-    for(int j = start; j < strlen(line); j++) {
+    for(int j = start; line[j] != '\0'; j++) {
         if (line[j] == ';') {
             return j;
         } else {
@@ -78,9 +61,15 @@ int print_line(int start, char *line) {
 
 int main(int argc, char* argv[]) {
     char *filename = argv[1];
+    char *ext = strrchr(filename, '.');
+    if (!ext) {
+        return 1;
+    } else if (strcmp(ext + 1, "jot") != 0) {
+        return 1;
+    }
     int row, col;
     int count;
-    char **lines = readFile("test.txt", &count);
+    char **lines = readFile(filename, &count);
     if (lines == NULL) {
         return 1;
     }
@@ -97,7 +86,7 @@ int main(int argc, char* argv[]) {
         if (strlen(lines[i]) > longest_row) {
             longest_row = strlen(lines[i]);
         }
-        for (int j = 0; j < strlen(lines[i]); j++) {
+        for (int j = 0; lines[i][j] != '\0'; j++) {
             char *ch = &lines[i][j];
             if (*ch == ';') {
                 if (j > longest_name) {
