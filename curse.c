@@ -17,12 +17,16 @@ char **readFile(const char *filename, int *count) {
             char **temp = realloc(lines, (*count + 1) * sizeof(char *));
             if (temp == NULL) {
                 for (int i = 0; i < *count; i++) free(lines[i]);
-                free(lines);
-                fclose(file);
+                    free(lines);
+                    fclose(file);
                 return NULL;
             }
             lines = temp;
+            if (strspn(buffer, " \t\r\n") == strlen(buffer)) {
+                continue;
+            }    
             lines[*count] = strdup(buffer);
+            
             if (lines[*count] == NULL) {
                 for (int i = 0; i < *count; i++) free(lines[i]);
                 free(lines);
@@ -36,7 +40,8 @@ char **readFile(const char *filename, int *count) {
         return lines;
     }
 
-int writeFile(const char *filename, const char *data) {
+int writeLine(const char *filename, const char *data) {
+    // Finds the first empty line and writes the data into it.
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
         perror("fopen");
@@ -73,7 +78,7 @@ int main(int argc, char* argv[]) {
     if (lines == NULL) {
         return 1;
     }
-
+    
     initscr();
     keypad(stdscr, true);
     raw();
@@ -96,7 +101,7 @@ int main(int argc, char* argv[]) {
             }
         }
     }
-    
+
     void draw_basic() {
         getmaxyx(stdscr, row, col);
         mvprintw(0, 0, "Jot - %s\n", filename);
